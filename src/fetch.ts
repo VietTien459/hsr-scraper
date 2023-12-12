@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {existsSync, mkdirSync} from "fs";
 import {readFile, writeFile} from "fs/promises";
-import * as Cheerio from "cheerio";
+import * as CheerioModule from "cheerio";
 import {ISkill, IStats, IWeaknessBreak} from "./skill.interface";
 import {Skill, Target} from "./enums";
 
@@ -49,7 +49,8 @@ export function extractData(htmlData: string | undefined) {
     if (!htmlData) {
         throw new Error("Empty HTML string")
     }
-    const $ = Cheerio.load(htmlData)
+    const $ = CheerioModule.load(htmlData)
+
 
     console.log("Extracting character main info")
     const mainInfo = new Map<string, string>()
@@ -124,12 +125,18 @@ export function extractData(htmlData: string | undefined) {
     console.log("Extracting character Skill info")
 
     const basic: ISkill = <ISkill>{}
-    const basicReg = /(.*) - (.*) \| (.*)\n/
+
+    const skill: ISkill = <ISkill>{}
+
+    const basicReg = /(.*) - (.*) \| (.*)/
     const erReg = /Energy Regeneration : (\d*)/
     const breakReg = /Weakness Break : (.*) : (\d*)/
 
-    $('[id=char_skills]').children().filter('table.skill_table:contains(Basic ATK)').each((_index, row) => {
-        const firstRow = $(row).find('tr:first').find('td:nth-child(2)').text()
+    const charSkillsTable = $('[id=char_skills]').children();
+
+
+    charSkillsTable.filter('table.skill_table:contains(Basic ATK)').each((_index, row) => {
+        const firstRow = $(row).find('tr:first').find('td:nth-child(2)').text().replace("\n","")
         basic.name = basicReg.exec(firstRow)?.[1] || ""
         basic.type = basicReg.exec(firstRow)?.[2] as Skill
         basic.target = basicReg.exec(firstRow)?.[3] as Target
@@ -145,13 +152,30 @@ export function extractData(htmlData: string | undefined) {
             .replaceAll(/ {2,}/g, " ")
             .replaceAll("\n", "")
             .replace(/<br><br><i>.*/, "")
-            .replaceAll(/<font.*data="(.)".*<\/font>/g, "{$1}")
-
+            .replaceAll(/<font.*data="(.)".*<\/font>/g, "<span id='{$1}'></span>")
     });
 
-    console.log(basic)
+    charSkillsTable.filter('table.skill_table:contains(Skill)').each((_index, row) => {
+        const firstRow = $(row).find('tr:first').find('td:nth-child(2)').text().replaceAll(/ {2,}/g, " ").replaceAll("\n", "")
 
+        console.log(firstRow)
+        skill.name = basicReg.exec(firstRow)?.[1] || ""
+        skill.type = basicReg.exec(firstRow)?.[2] as Skill
+        skill.target = basicReg.exec(firstRow)?.[3] as Target
+        skill.energyRegeneration = +(erReg.exec($(row).find('tr:nth-child(2)').text())?.[1] || NaN)
+        skill.weaknessBreak = <IWeaknessBreak>{}
+        skill.weaknessBreak.target = breakReg.exec($(row).find('tr:nth-child(3)').text())?.[1] as Target
+        skill.weaknessBreak.value = +(breakReg.exec($(row).find('tr:nth-child(3)').text())?.[2] || NaN)
+        skill.description = $(row).find('tr:nth-child(4)').find('i').text()
+            .replaceAll(/ {2,}/g, " ")
+            .replaceAll("\n", "")
+        skill.stats = <IStats>{}
+        skill.stats.format = $(row).find('tr:nth-child(4)').find('td:first').html()!
+            .replaceAll(/ {2,}/g, " ")
+            .replaceAll("\n", "")
+            .replace(/<br><br><i>.*/, "")
+            .replaceAll(/<font.*data="(.)".*<\/font>/g, "<span id='{$1}'></span>")
+    });
+
+    console.log(skill)
 }
-
-
-
