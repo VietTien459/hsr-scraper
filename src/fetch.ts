@@ -1,9 +1,13 @@
 import axios from 'axios';
-import {existsSync, mkdirSync} from "fs";
-import {readFile, writeFile} from "fs/promises";
+import { existsSync, mkdirSync } from "fs";
+import { readFile, writeFile } from "fs/promises";
 import * as CheerioModule from "cheerio";
-import {ISkill, IStats, IWeaknessBreak} from "./skill.interface";
-import {Skill, Target} from "./enums";
+import { ISkill, IStats, IWeaknessBreak } from "./skill.interface";
+import { Skill, Target } from "./enums";
+
+import { CharacterData, CharacterStats, Ability, AscensionMaterial, Ascension } from './interfaces';
+import { log } from 'console';
+
 
 function fetchPage(url: string): Promise<string | undefined> {
     return axios
@@ -27,7 +31,7 @@ export async function fetchFromWebOrCache(url: string, ignoreCache = false) {
         console.log(`Reading ${url} data from cache`);
         return await readFile(
             `.cache/${Buffer.from(url).toString('base64')}.html`,
-            {encoding: 'utf8'},
+            { encoding: 'utf8' },
         )
     } else {
         console.log(`Fetching ${url} `);
@@ -36,13 +40,12 @@ export async function fetchFromWebOrCache(url: string, ignoreCache = false) {
             await writeFile(
                 `.cache/${Buffer.from(url).toString('base64')}.html`,
                 htmlData,
-                {encoding: 'utf8'},
+                { encoding: 'utf8' },
             );
         }
         return htmlData
     }
 }
-
 
 export function extractData(htmlData: string | undefined) {
     console.log("Extracting data from HTML string")
@@ -50,6 +53,8 @@ export function extractData(htmlData: string | undefined) {
         throw new Error("Empty HTML string")
     }
     const $ = CheerioModule.load(htmlData)
+
+    console.log(extractBasicAtk(htmlData))
 
 
     console.log("Extracting character main info")
@@ -71,7 +76,7 @@ export function extractData(htmlData: string | undefined) {
     writeFile(
         `.out/${fileName}-main-info.json`,
         JSON.stringify(Object.fromEntries(mainInfo)),
-        {encoding: 'utf8'},
+        { encoding: 'utf8' },
     ).finally(() =>
         console.log("Saved Main Info")
     );
@@ -97,7 +102,7 @@ export function extractData(htmlData: string | undefined) {
     writeFile(
         `.out/${fileName}-stat-info.json`,
         JSON.stringify(Object.fromEntries(statInfo)),
-        {encoding: 'utf8'},
+        { encoding: 'utf8' },
     ).finally(() =>
         console.log("Saved Stat Info")
     );
@@ -118,7 +123,7 @@ export function extractData(htmlData: string | undefined) {
     writeFile(
         `.out/${fileName}-eidolon-info.json`,
         JSON.stringify(Object.fromEntries(eidolons)),
-        {encoding: 'utf8'},
+        { encoding: 'utf8' },
     ).finally(() =>
         console.log("Saved Eidolons Info")
     );
@@ -136,7 +141,7 @@ export function extractData(htmlData: string | undefined) {
 
 
     charSkillsTable.filter('table.skill_table:contains(Basic ATK)').each((_index, row) => {
-        const firstRow = $(row).find('tr:first').find('td:nth-child(2)').text().replace("\n","")
+        const firstRow = $(row).find('tr:first').find('td:nth-child(2)').text().replace("\n", "")
         basic.name = basicReg.exec(firstRow)?.[1] || ""
         basic.type = basicReg.exec(firstRow)?.[2] as Skill
         basic.target = basicReg.exec(firstRow)?.[3] as Target
@@ -178,4 +183,152 @@ export function extractData(htmlData: string | undefined) {
     });
 
     console.log(skill)
+}
+
+
+function extractCharacterData(html: string): CharacterData | null {
+    const $ = CheerioModule.load(html)
+
+    const characterData: CharacterData = {
+        name: '',
+        faction: '',
+        rarity: 0,
+        path: '',
+        combatTypes: '',
+        chineseName: '',
+        englishName: '',
+        koreanName: '',
+        japaneseName: '',
+        ascensionMaterials: [],
+        traceMaterials: [],
+        story: '',
+    };
+
+    const getCellValue = (row: cheerio.Cheerio): string => row.next().text().trim();
+
+    const characterTable = $('table.main_table:first')
+
+    // Extract data from the HTML and populate the characterData object
+    characterData.name = getCellValue(characterTable.find('td:contains("Concepts")'));
+    characterData.faction = getCellValue(characterTable.find('td:contains("Faction")'));
+    characterData.rarity = characterTable.find('td:contains("Rarity")').next().find('img').length;
+    characterData.path = getCellValue(characterTable.find('td:contains("Path")'));
+    characterData.combatTypes = getCellValue(characterTable.find('td:contains("Combat Types")'));
+    characterData.chineseName = getCellValue(characterTable.find('td:contains("Chinese")'));
+    characterData.englishName = getCellValue(characterTable.find('td:contains("English")'));
+    characterData.koreanName = getCellValue(characterTable.find('td:contains("Korean")'));
+    characterData.japaneseName = getCellValue(characterTable.find('td:contains("Japanese")'));
+
+    // Extract ascension materials
+    characterTable.find('td:contains("Ascension Materials")').next().find('a').each((_index, element) => {
+
+        const materialName = $(element).find('img').attr('alt') || "";
+        const materialCount = $(element).text().trim();
+        characterData.ascensionMaterials.push({
+            itemName: materialName,
+            itemCount: materialCount
+        });
+    });
+
+    // Extract trace materials
+    characterTable.find('td:contains("Trace Materials")').next().find('a').each((_index, element) => {
+        const materialName = $(element).find('img').attr('alt') || "";
+        const materialCount = $(element).text().trim();
+        characterData.traceMaterials.push({
+            itemName: materialName,
+            itemCount: materialCount
+        });
+    });
+
+    characterData.story = characterTable.find('td:contains("Story")').next().html()?.trim() || '';
+
+    return characterData;
+}
+
+function extractCharacterStats(html: string): CharacterStats[] {
+    const $ = CheerioModule.load(html)
+    const statsTable = $('table.stat_table:first')
+    const characterStats: CharacterStats[] = [];
+
+    // Extract data from the HTML and populate the characterStats array
+    statsTable.find('tbody tr').each((index, row) => {
+        const columns = $(row).find('td');
+
+        const stats: CharacterStats = {
+            level: columns.eq(0).text(),
+            ATK: parseFloat(columns.eq(1).text()),
+            DEF: parseFloat(columns.eq(2).text()),
+            HP: parseFloat(columns.eq(3).text()),
+            SPD: parseInt(columns.eq(4).text(), 10),
+            CRITRate: columns.eq(5).text(),
+            CRITDMG: columns.eq(6).text(),
+            Taunt: parseInt(columns.eq(7).text(), 10),
+            Energy: parseInt(columns.eq(8).text(), 10),
+            ascensionMaterials: [],
+        };
+
+        // Extract ascension materials
+        columns.eq(9).find('a').each((_index, element) => {
+            const materialName = $(element).find('img').attr('alt') || "";
+            const materialCount = $(element).text().trim();
+            stats.ascensionMaterials.push({
+                itemName: materialName,
+                itemCount: materialCount,
+            });
+        });
+
+        characterStats.push(stats);
+    });
+
+    return characterStats;
+}
+
+function extractBasicAtk(html: string) {
+    const $ = CheerioModule.load(html)
+    const skills: Ability[] = [];
+    const skillTable = $('table.skill_table:contains(Basic ATK |)')
+
+
+    skillTable.each((index, table) => {
+        console.log(index);
+        
+        const skill: Ability = {} as Ability;
+        skill.name = $(table).find('td:contains(Basic ATK) a').text().trim();
+        skill.type = $(table).find('td:contains(Basic ATK)').text().trim();
+
+        const details: string[] = [];
+        $(table).find('td.level_slider_desc').each((i, detail) => {
+            details.push($(detail).text().trim());
+        });
+        // skill.energyRegeneration = parseInt(details[0].split(':')[1].trim(), 10);
+        // skill.weaknessBreak = details[1].split(':')[1].trim();
+
+        const damageDescription = details[2];
+        skill.damageDescription = `Deals Quantum DMG equal to ${damageDescription} of Fu Xuan's Max HP to a single enemy. Deals minor Quantum DMG to a single enemy.`;
+
+        skill.level = {
+            min: 1,
+            max: 9,
+            current: parseInt($(table).find('input').attr('value') || '', 10),
+        };
+
+        const ascensionMaterials: Ascension[] = [];
+        $(table).find('.genshin_table.skill_dmg_table tr:gt(0)').each((i, row) => {
+            const columns = $(row).find('td');
+            const level = parseInt(columns.eq(0).text().trim(), 10);
+            const percentage = columns.eq(1).text().trim();
+            const materials: AscensionMaterial[] = [];
+            columns.eq(2).find('a').each((j, material) => {
+                const materialName = $(material).find('img').attr('alt') || '';
+                const quantity = $(material).find('span').text().trim();
+                materials.push({ itemName: materialName, itemCount: quantity });
+            });
+            ascensionMaterials.push({ level: level, percentage: percentage, ascensionMaterials: materials });
+        });
+
+        skill.ascensions = ascensionMaterials;
+        skills.push(skill);
+    });
+
+    return { skills: skills };
 }

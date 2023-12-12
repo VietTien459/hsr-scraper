@@ -1,6 +1,6 @@
 export interface AscensionMaterial {
     itemName: string;
-    itemCount: number;
+    itemCount: string;
 }
 
 export interface SkillMaterial {
@@ -10,7 +10,6 @@ export interface SkillMaterial {
 
 export interface CharacterData {
     name: string;
-    concepts: string;
     faction: string;
     rarity: number;
     path: string;
@@ -24,21 +23,17 @@ export interface CharacterData {
     story: string;
 }
 
-export interface StatTableRow {
-    level: number;
-    atk: number;
-    def: number;
-    hp: number;
-    spd: number;
-    critRate: string;
-    critDmg: string;
-    taunt: number;
-    energy: number;
-    ascensionMaterials: AscensionMaterial[];
-}
-
 export interface CharacterStats {
-    stats: StatTableRow[];
+    level: string;
+    ATK: number;
+    DEF: number;
+    HP: number;
+    SPD: number;
+    CRITRate: string;
+    CRITDMG: string;
+    Taunt: number;
+    Energy: number;
+    ascensionMaterials: AscensionMaterial[];
 }
 
 
@@ -56,3 +51,27 @@ export interface SkillDetails {
     weaknessBreak: number;
     levelData: SkillLevelData[];
 }
+
+
+ export interface Ascension {
+    level: number;
+    percentage: string;
+    ascensionMaterials: AscensionMaterial[];
+}
+
+interface Level {
+    min: number;
+    max: number;
+    current: number;
+}
+
+export interface Ability {
+    name: string;
+    type: string;
+    energyRegeneration: number;
+    weaknessBreak: string;
+    damageDescription: string;
+    level: Level;
+    ascensions: Ascension[];
+}
+
