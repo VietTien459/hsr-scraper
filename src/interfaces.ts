@@ -53,16 +53,10 @@ export interface SkillDetails {
 }
 
 
- export interface Ascension {
+export interface Ascension {
     level: number;
     percentage: string;
     ascensionMaterials: AscensionMaterial[];
-}
-
-interface Level {
-    min: number;
-    max: number;
-    current: number;
 }
 
 export interface Ability {
@@ -70,8 +64,14 @@ export interface Ability {
     type: string;
     energyRegeneration: number;
     weaknessBreak: string;
+    description: string,
     damageDescription: string;
-    level: Level;
     ascensions: Ascension[];
+}
+
+export interface Eidolon {
+    name : string,
+    level: number,
+    description: string
 }
 

@@ -1,12 +1,10 @@
 import axios from 'axios';
-import { existsSync, mkdirSync } from "fs";
-import { readFile, writeFile } from "fs/promises";
+import {existsSync, mkdirSync} from "fs";
+import {readFile, writeFile} from "fs/promises";
 import * as CheerioModule from "cheerio";
-import { ISkill, IStats, IWeaknessBreak } from "./skill.interface";
-import { Skill, Target } from "./enums";
 
-import { CharacterData, CharacterStats, Ability, AscensionMaterial, Ascension } from './interfaces';
-import { log } from 'console';
+import {Ability, CharacterData, CharacterStats, Eidolon} from './interfaces';
+import {generateRandomFileName} from "./helper";
 
 
 function fetchPage(url: string): Promise<string | undefined> {
@@ -31,7 +29,7 @@ export async function fetchFromWebOrCache(url: string, ignoreCache = false) {
         console.log(`Reading ${url} data from cache`);
         return await readFile(
             `.cache/${Buffer.from(url).toString('base64')}.html`,
-            { encoding: 'utf8' },
+            {encoding: 'utf8'},
         )
     } else {
         console.log(`Fetching ${url} `);
@@ -40,7 +38,7 @@ export async function fetchFromWebOrCache(url: string, ignoreCache = false) {
             await writeFile(
                 `.cache/${Buffer.from(url).toString('base64')}.html`,
                 htmlData,
-                { encoding: 'utf8' },
+                {encoding: 'utf8'},
             );
         }
         return htmlData
@@ -52,137 +50,19 @@ export function extractData(htmlData: string | undefined) {
     if (!htmlData) {
         throw new Error("Empty HTML string")
     }
-    const $ = CheerioModule.load(htmlData)
-
-    console.log(extractBasicAtk(htmlData))
-
-
-    console.log("Extracting character main info")
-    const mainInfo = new Map<string, string>()
-    $('table.main_table:first').find('tr').each((j, row) => {
-        // map.set($(row).text(),)
-        mainInfo.set(
-            $(row).find('td:nth-last-child(2)').text(),
-            $(row).find('td:last').text()
-                .replaceAll(/ {2,}/g, " ")
-                .replaceAll("\n", "")
-        )
-    });
-
-    mainInfo.delete("Ascension Materials")
-    mainInfo.delete("Trace Materials")
-
-    const fileName = mainInfo.get('Concepts')?.toLowerCase().replace(" ", "-") || "Unknown"
+    const fileName = generateRandomFileName("json")
     writeFile(
-        `.out/${fileName}-main-info.json`,
-        JSON.stringify(Object.fromEntries(mainInfo)),
-        { encoding: 'utf8' },
+        `.out/${fileName}.json`,
+        JSON.stringify({
+            ...extractCharacterData(htmlData),
+            stats: extractCharacterStats(htmlData),
+            skills: extractSkills(htmlData),
+            eidolons: extractEidolons(htmlData)
+        }),
+        {encoding: 'utf8'},
     ).finally(() =>
-        console.log("Saved Main Info")
+        console.log("Saved.")
     );
-    console.log("Extracting character stats info")
-
-    const statInfo = new Map<string, any>()
-    $('table.stat_table:first').find('tr:not(:first)').each((j, row) => {
-        statInfo.set(
-            $(row).find('td:first').text(),
-            {
-                atk: $(row).find('td:nth-child(2)').text(),
-                def: $(row).find('td:nth-child(3)').text(),
-                hp: $(row).find('td:nth-child(4)').text(),
-                spd: $(row).find('td:nth-child(5)').text(),
-                critRate: $(row).find('td:nth-child(6)').text(),
-                critDmg: $(row).find('td:nth-child(7)').text(),
-                taunt: $(row).find('td:nth-child(8)').text(),
-                energy: $(row).find('td:nth-child(9)').text(),
-            }
-        )
-    });
-
-    writeFile(
-        `.out/${fileName}-stat-info.json`,
-        JSON.stringify(Object.fromEntries(statInfo)),
-        { encoding: 'utf8' },
-    ).finally(() =>
-        console.log("Saved Stat Info")
-    );
-
-    console.log("Extracting character eidolons info")
-
-    const eidolons = new Map<string, any>()
-    $('[id=char_eidolon]').find('table.skill_table').each((j, row) => {
-        // map.set($(row).text(),)
-        eidolons.set((j + 1).toString(), {
-            name: $(row).find('td:nth-child(2)').text(),
-            text: $(row).find('td:last').text()
-                .replaceAll(/ {2,}/g, " ")
-                .replaceAll("\n", "")
-        })
-    });
-
-    writeFile(
-        `.out/${fileName}-eidolon-info.json`,
-        JSON.stringify(Object.fromEntries(eidolons)),
-        { encoding: 'utf8' },
-    ).finally(() =>
-        console.log("Saved Eidolons Info")
-    );
-    console.log("Extracting character Skill info")
-
-    const basic: ISkill = <ISkill>{}
-
-    const skill: ISkill = <ISkill>{}
-
-    const basicReg = /(.*) - (.*) \| (.*)/
-    const erReg = /Energy Regeneration : (\d*)/
-    const breakReg = /Weakness Break : (.*) : (\d*)/
-
-    const charSkillsTable = $('[id=char_skills]').children();
-
-
-    charSkillsTable.filter('table.skill_table:contains(Basic ATK)').each((_index, row) => {
-        const firstRow = $(row).find('tr:first').find('td:nth-child(2)').text().replace("\n", "")
-        basic.name = basicReg.exec(firstRow)?.[1] || ""
-        basic.type = basicReg.exec(firstRow)?.[2] as Skill
-        basic.target = basicReg.exec(firstRow)?.[3] as Target
-        basic.energyRegeneration = +(erReg.exec($(row).find('tr:nth-child(2)').text())?.[1] || NaN)
-        basic.weaknessBreak = <IWeaknessBreak>{}
-        basic.weaknessBreak.target = breakReg.exec($(row).find('tr:nth-child(3)').text())?.[1] as Target
-        basic.weaknessBreak.value = +(breakReg.exec($(row).find('tr:nth-child(3)').text())?.[2] || NaN)
-        basic.description = $(row).find('tr:nth-child(4)').find('i').text()
-            .replaceAll(/ {2,}/g, " ")
-            .replaceAll("\n", "")
-        basic.stats = <IStats>{}
-        basic.stats.format = $(row).find('tr:nth-child(4)').find('td:first').html()!
-            .replaceAll(/ {2,}/g, " ")
-            .replaceAll("\n", "")
-            .replace(/<br><br><i>.*/, "")
-            .replaceAll(/<font.*data="(.)".*<\/font>/g, "<span id='{$1}'></span>")
-    });
-
-    charSkillsTable.filter('table.skill_table:contains(Skill)').each((_index, row) => {
-        const firstRow = $(row).find('tr:first').find('td:nth-child(2)').text().replaceAll(/ {2,}/g, " ").replaceAll("\n", "")
-
-        console.log(firstRow)
-        skill.name = basicReg.exec(firstRow)?.[1] || ""
-        skill.type = basicReg.exec(firstRow)?.[2] as Skill
-        skill.target = basicReg.exec(firstRow)?.[3] as Target
-        skill.energyRegeneration = +(erReg.exec($(row).find('tr:nth-child(2)').text())?.[1] || NaN)
-        skill.weaknessBreak = <IWeaknessBreak>{}
-        skill.weaknessBreak.target = breakReg.exec($(row).find('tr:nth-child(3)').text())?.[1] as Target
-        skill.weaknessBreak.value = +(breakReg.exec($(row).find('tr:nth-child(3)').text())?.[2] || NaN)
-        skill.description = $(row).find('tr:nth-child(4)').find('i').text()
-            .replaceAll(/ {2,}/g, " ")
-            .replaceAll("\n", "")
-        skill.stats = <IStats>{}
-        skill.stats.format = $(row).find('tr:nth-child(4)').find('td:first').html()!
-            .replaceAll(/ {2,}/g, " ")
-            .replaceAll("\n", "")
-            .replace(/<br><br><i>.*/, "")
-            .replaceAll(/<font.*data="(.)".*<\/font>/g, "<span id='{$1}'></span>")
-    });
-
-    console.log(skill)
 }
 
 
@@ -204,7 +84,7 @@ function extractCharacterData(html: string): CharacterData | null {
         story: '',
     };
 
-    const getCellValue = (row: cheerio.Cheerio): string => row.next().text().trim();
+    const getCellValue = (row: cheerio.Cheerio): string => row.next().text().replace(/\s+/g, " ").trim();
 
     const characterTable = $('table.main_table:first')
 
@@ -221,7 +101,6 @@ function extractCharacterData(html: string): CharacterData | null {
 
     // Extract ascension materials
     characterTable.find('td:contains("Ascension Materials")').next().find('a').each((_index, element) => {
-
         const materialName = $(element).find('img').attr('alt') || "";
         const materialCount = $(element).text().trim();
         characterData.ascensionMaterials.push({
@@ -240,7 +119,7 @@ function extractCharacterData(html: string): CharacterData | null {
         });
     });
 
-    characterData.story = characterTable.find('td:contains("Story")').next().html()?.trim() || '';
+    characterData.story = characterTable.find('td:contains("Story")').next().text().replace(/\s+/g, " ").trim();
 
     return characterData;
 }
@@ -283,52 +162,36 @@ function extractCharacterStats(html: string): CharacterStats[] {
     return characterStats;
 }
 
-function extractBasicAtk(html: string) {
+function extractSkills(html: string) {
     const $ = CheerioModule.load(html)
-    const skills: Ability[] = [];
-    const skillTable = $('table.skill_table:contains(Basic ATK |)')
 
+    return $('#char_skills > table.skill_table').map(((_index, element) => {
+        const skill: Ability = {} as Ability
+        skill.name = $(element).find('tr:first a').text().replace(/\s+/g, " ").trim()
 
-    skillTable.each((index, table) => {
-        console.log(index);
-        
-        const skill: Ability = {} as Ability;
-        skill.name = $(table).find('td:contains(Basic ATK) a').text().trim();
-        skill.type = $(table).find('td:contains(Basic ATK)').text().trim();
+        const erMatch = $(element).find('td:contains(Energy Regeneration)').text().trim().match(/\d+/)
+        skill.energyRegeneration = erMatch ? parseInt(erMatch[0], 10) : 0;
 
-        const details: string[] = [];
-        $(table).find('td.level_slider_desc').each((i, detail) => {
-            details.push($(detail).text().trim());
-        });
-        // skill.energyRegeneration = parseInt(details[0].split(':')[1].trim(), 10);
-        // skill.weaknessBreak = details[1].split(':')[1].trim();
+        skill.weaknessBreak = $(element).find('td:contains(Weakness Break \\:)').text().trim()
 
-        const damageDescription = details[2];
-        skill.damageDescription = `Deals Quantum DMG equal to ${damageDescription} of Fu Xuan's Max HP to a single enemy. Deals minor Quantum DMG to a single enemy.`;
+        skill.description = $(element).find('td.level_slider_desc i').text().replace(/\s+/g, " ").trim()
 
-        skill.level = {
-            min: 1,
-            max: 9,
-            current: parseInt($(table).find('input').attr('value') || '', 10),
-        };
+        return skill
+    })).get()
+}
 
-        const ascensionMaterials: Ascension[] = [];
-        $(table).find('.genshin_table.skill_dmg_table tr:gt(0)').each((i, row) => {
-            const columns = $(row).find('td');
-            const level = parseInt(columns.eq(0).text().trim(), 10);
-            const percentage = columns.eq(1).text().trim();
-            const materials: AscensionMaterial[] = [];
-            columns.eq(2).find('a').each((j, material) => {
-                const materialName = $(material).find('img').attr('alt') || '';
-                const quantity = $(material).find('span').text().trim();
-                materials.push({ itemName: materialName, itemCount: quantity });
-            });
-            ascensionMaterials.push({ level: level, percentage: percentage, ascensionMaterials: materials });
-        });
+function extractEidolons(html: string) {
+    const $ = CheerioModule.load(html)
 
-        skill.ascensions = ascensionMaterials;
-        skills.push(skill);
-    });
+    return $('#char_eidolon > table.skill_table').map(((index, element) => {
+        const eidolon: Eidolon = {} as Eidolon
 
-    return { skills: skills };
+        eidolon.level = index + 1
+
+        eidolon.name = $(element).find('tr:first a').text().replace(/\s+/g, " ").trim()
+
+        eidolon.description = $(element).find('tr:last').text().replace(/\s+/g, " ").trim()
+
+        return eidolon
+    })).get()
 }
