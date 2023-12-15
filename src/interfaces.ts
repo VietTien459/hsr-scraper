@@ -3,10 +3,6 @@ export interface AscensionMaterial {
     itemCount: string;
 }
 
-export interface SkillMaterial {
-    itemName: string;
-    itemCount: number;
-}
 
 export interface CharacterData {
     name: string;
@@ -37,22 +33,6 @@ export interface CharacterStats {
 }
 
 
-export interface SkillLevelData {
-    level: number;
-    percentage: string;
-    materials: SkillMaterial[]
-}
-
-export interface SkillDetails {
-    name: string;
-    type: string;
-    description: string;
-    energyRegen: number;
-    weaknessBreak: number;
-    levelData: SkillLevelData[];
-}
-
-
 export interface Ascension {
     level: number;
     percentage: string;
@@ -70,7 +50,7 @@ export interface Ability {
 }
 
 export interface Eidolon {
-    name : string,
+    name: string,
     level: number,
     description: string
 }
