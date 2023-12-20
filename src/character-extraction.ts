@@ -25,7 +25,7 @@ export function extractCharacterData(htmlData: string | undefined, outputFileNam
         throw new Error("Empty HTML string")
     }
     createDir('.out')
-    const fileName = `${outputFileName}` || generateRandomFileName("json")
+    const fileName = outputFileName || generateRandomFileName("json")
     writeFile(
         `.out/${fileName}.json`,
         JSON.stringify({
