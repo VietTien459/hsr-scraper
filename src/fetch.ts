@@ -51,7 +51,7 @@ export function extractData(htmlData: string | undefined, outputFileName?: strin
         throw new Error("Empty HTML string")
     }
     createDir('.out')
-    const fileName = `${outputFileName}.json` || generateRandomFileName("json")
+    const fileName = `${outputFileName}` || generateRandomFileName("json")
     writeFile(
         `.out/${fileName}.json`,
         JSON.stringify({
