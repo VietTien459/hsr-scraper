@@ -1,10 +1,11 @@
-import {extractData, fetchFromWebOrCache} from './fetch'
+import {fetchFromWebOrCache} from './fetch'
 import {CharacterUrls} from "./global";
+import {extractCharacterData} from "./character-extraction";
 
 CharacterUrls
     .forEach(charUrl =>
         fetchFromWebOrCache(charUrl.url, true)
             .then(
-                htmlData => extractData(htmlData, charUrl.name)
+                htmlData => extractCharacterData(htmlData, charUrl.name)
             )
     )
