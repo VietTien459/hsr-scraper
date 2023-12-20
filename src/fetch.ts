@@ -1,24 +1,24 @@
 import axios from 'axios';
-import {existsSync, mkdirSync} from "fs";
 import {readFile, writeFile} from "fs/promises";
 import * as CheerioModule from "cheerio";
 
 import {Ability, CharacterData, CharacterStats, Eidolon} from './interfaces';
-import {generateRandomFileName} from "./helper";
+import {createDir, generateRandomFileName} from "./helper";
+import {existsSync} from "fs";
 
 
 function fetchPage(url: string): Promise<string | undefined> {
     return axios
         .get(url)
         .then(res => res.data)
-        .catch(console.error);
+        .catch(error => {
+            throw new Error(`Failed to fetch page: ${error.message}`);
+        });
 }
 
 export async function fetchFromWebOrCache(url: string, ignoreCache = false) {
     // If the cache folder doesn't exist, create it
-    if (!existsSync('.cache')) {
-        mkdirSync('.cache');
-    }
+    createDir(".cache")
     console.log(`Getting data for ${url}...`);
     if (
         !ignoreCache &&
@@ -45,12 +45,13 @@ export async function fetchFromWebOrCache(url: string, ignoreCache = false) {
     }
 }
 
-export function extractData(htmlData: string | undefined) {
+export function extractData(htmlData: string | undefined, outputFileName?: string) {
     console.log("Extracting data from HTML string")
     if (!htmlData) {
         throw new Error("Empty HTML string")
     }
-    const fileName = generateRandomFileName("json")
+    createDir('.out')
+    const fileName = `${outputFileName}.json` || generateRandomFileName("json")
     writeFile(
         `.out/${fileName}.json`,
         JSON.stringify({
