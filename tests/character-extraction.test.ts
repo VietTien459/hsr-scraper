@@ -13,7 +13,7 @@ jest.mock('../src/helper', () => {
 
 jest.mock('fs', () => {
     return ({
-        writeFile: jest.fn(() => ({})),
+        writeFile: jest.fn().mockResolvedValue(43),
     })
 })
 
