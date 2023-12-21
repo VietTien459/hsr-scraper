@@ -25,9 +25,7 @@ export function extractLightConeData(htmlData: string | undefined, outputFileNam
 
         }),
         {encoding: 'utf8'},
-    ).finally(() =>
-        console.log("Saved.")
-    );
+    ).then()
 }
 
 /**

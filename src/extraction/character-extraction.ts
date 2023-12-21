@@ -34,9 +34,7 @@ export function extractCharacterData(htmlData: string | undefined, outputFileNam
             eidolons: extractEidolons(htmlData)
         }),
         {encoding: 'utf8'},
-    ).finally(() =>
-        console.log("Saved.")
-    );
+    ).then()
 }
 
 

@@ -24,9 +24,7 @@ export function extractRelicData(htmlData: string | undefined, outputFileName?: 
             slots: extractRelicSlots(htmlData)
         }),
         {encoding: 'utf8'},
-    ).finally(() =>
-        console.log("Saved.")
-    );
+    ).then()
 }
 
 /**

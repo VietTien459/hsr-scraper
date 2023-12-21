@@ -6,9 +6,12 @@
   "scripts": {
     "compile": "npx tsc",
     "lint": "eslint . --fix",
-    "start": "npx ts-node src/main.ts"
+    "start": "npx ts-node src/main.ts",
+    "character": "npx run-func ./dist/main.js extractCharacters",
+    "lightcone": "npx run-func ./dist/main.js extractLightCone",
+    "relic": "npx run-func ./dist/main.js extractRelic"
   },
-  "author": "",
+  "author": "Kita-chan",
   "license": "ISC",
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
