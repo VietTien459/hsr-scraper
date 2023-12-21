@@ -3,7 +3,13 @@ import CheerioModule from "cheerio";
 import {createDir, generateRandomFileName} from "../helper";
 import {writeFile} from "fs/promises";
 
-
+/**
+ * Extracts LightCone data from an HTML string and saves it to a JSON file.
+ *
+ * @param {string | undefined} htmlData - The HTML string containing LightCone data.
+ * @param {string} [outputFileName] - The name of the output JSON file. If not provided, a random filename will be generated.
+ * @throws Will throw an error if the HTML string is empty.
+ */
 export function extractLightConeData(htmlData: string | undefined, outputFileName?: string) {
     console.log("Extracting data from HTML string")
     if (!htmlData) {
@@ -24,6 +30,12 @@ export function extractLightConeData(htmlData: string | undefined, outputFileNam
     );
 }
 
+/**
+ * Extracts main LightCone data from an HTML string.
+ *
+ * @param {string} html - The HTML string containing LightCone data.
+ * @returns {LightConeData | null} An object representing the main LightCone data or null if data extraction fails.
+ */
 function extractLightConeMainData(html: string): LightConeData | null {
     const $ = CheerioModule.load(html)
 
@@ -64,7 +76,12 @@ function extractLightConeMainData(html: string): LightConeData | null {
     return lightConeData;
 }
 
-
+/**
+ * Extracts LightCone stats data from an HTML string.
+ *
+ * @param {string} html - The HTML string containing LightCone stats data.
+ * @returns {LightConeStats[]} An array of objects representing LightCone stats data.
+ */
 function extractLightConeStats(html: string): LightConeStats[] {
     const $ = CheerioModule.load(html)
     const statsTable = $('table.stat_table:first')

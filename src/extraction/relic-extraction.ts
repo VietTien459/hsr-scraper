@@ -3,7 +3,13 @@ import CheerioModule from "cheerio";
 import {createDir, generateRandomFileName} from "../helper";
 import {writeFile} from "fs/promises";
 
-
+/**
+ * Extracts relic data from an HTML string and saves it to a JSON file.
+ *
+ * @param {string | undefined} htmlData - The HTML string containing relic data.
+ * @param {string} [outputFileName] - The name of the output JSON file. If not provided, a random filename will be generated.
+ * @throws Will throw an error if the HTML string is empty.
+ */
 export function extractRelicData(htmlData: string | undefined, outputFileName?: string) {
     if (!htmlData) {
         throw new Error("Empty HTML string")
@@ -23,6 +29,12 @@ export function extractRelicData(htmlData: string | undefined, outputFileName?: 
     );
 }
 
+/**
+ * Extracts main relic data from an HTML string.
+ *
+ * @param {string} html - The HTML string containing relic data.
+ * @returns {RelicData | null} An object representing the main relic data or null if data extraction fails.
+ */
 function extractRelicMainData(html: string): RelicData | null {
     const $ = CheerioModule.load(html)
 
@@ -50,6 +62,12 @@ const SlotIds = [
     '#object_piece_ids',
 ]
 
+/**
+ * Extracts relic slot data from an HTML string.
+ *
+ * @param {string} html - The HTML string containing relic data.
+ * @returns {RelicSlot[]} An array of objects representing relic slot data.
+ */
 function extractRelicSlots(html: string): RelicSlot[] {
     const $ = CheerioModule.load(html)
     const storyTable = $('#story_hash')
