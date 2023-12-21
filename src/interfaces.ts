@@ -67,3 +67,15 @@ export interface LightConeData {
     ascensionMaterials: AscensionMaterial[];
     story: string;
 }
+
+
+export interface RelicData{
+    name: string;
+    effect: string;
+}
+
+export interface RelicSlot {
+    slot: string
+    name: string
+    story : string
+}

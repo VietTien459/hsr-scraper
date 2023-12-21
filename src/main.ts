@@ -1,21 +1,31 @@
 import {fetchFromWebOrCache} from './fetch'
-import {CharacterUrls, LightConeUrls,} from "./global";
+import {CharacterUrls, LightConeUrls, RelicUrls,} from "./global";
 import {extractCharacterData} from "./extraction/character-extraction";
 import {extractLightConeData} from "./extraction/lightcone-extraction";
+import {extractRelicData} from "./extraction/relic-extraction";
 
 CharacterUrls
-    .forEach(charUrl =>
-        fetchFromWebOrCache(charUrl.url, true)
+    .forEach(urlData =>
+        fetchFromWebOrCache(urlData.url, true)
             .then(
-                htmlData => extractCharacterData(htmlData, charUrl.name)
+                htmlData => extractCharacterData(htmlData, urlData.name)
             )
     )
 
 LightConeUrls
-    .forEach(charUrl =>
-        fetchFromWebOrCache(charUrl.url, true)
+    .forEach(urlData =>
+        fetchFromWebOrCache(urlData.url, true)
             .then(
-                htmlData => extractLightConeData(htmlData, charUrl.name)
+                htmlData => extractLightConeData(htmlData, urlData.name)
             )
     )
+
+RelicUrls
+    .forEach(urlData =>
+        fetchFromWebOrCache(urlData.url, true)
+            .then(
+                htmlData => extractRelicData(htmlData, urlData.name)
+            )
+    )
+
 

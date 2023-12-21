@@ -1,7 +1,7 @@
 import CheerioModule from "cheerio";
 
 
-export function getAllCharactersUrls(htmlData: string | undefined): UrlData[] {
+export function getUrls(htmlData: string | undefined): UrlData[] {
     if (!htmlData) {
         throw new Error("Empty HTML string")
     }
@@ -543,6 +543,122 @@ export const LightConeUrls = [
         url: 'https://hsr.honeyhunterworld.com/hey-over-here-item/?lang=EN'
     }
 ]
+
+export const RelicUrls= [
+    {
+        name: 'passerby-of-wandering-cloud-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/passerby-of-wandering-cloud-relic_set/?lang=EN'
+    },
+    {
+        name: 'musketeer-of-wild-wheat-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/musketeer-of-wild-wheat-relic_set/?lang=EN'
+    },
+    {
+        name: 'knight-of-purity-palace-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/knight-of-purity-palace-relic_set/?lang=EN'
+    },
+    {
+        name: 'hunter-of-glacial-forest-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/hunter-of-glacial-forest-relic_set/?lang=EN'
+    },
+    {
+        name: 'champion-of-streetwise-boxing-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/champion-of-streetwise-boxing-relic_set/?lang=EN'
+    },
+    {
+        name: 'guard-of-wuthering-snow-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/guard-of-wuthering-snow-relic_set/?lang=EN'
+    },
+    {
+        name: 'firesmith-of-lava-forging-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/firesmith-of-lava-forging-relic_set/?lang=EN'
+    },
+    {
+        name: 'genius-of-brilliant-stars-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/genius-of-brilliant-stars-relic_set/?lang=EN'
+    },
+    {
+        name: 'band-of-sizzling-thunder-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/band-of-sizzling-thunder-relic_set/?lang=EN'
+    },
+    {
+        name: 'eagle-of-twilight-line-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/eagle-of-twilight-line-relic_set/?lang=EN'
+    },
+    {
+        name: 'thief-of-shooting-meteor-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/thief-of-shooting-meteor-relic_set/?lang=EN'
+    },
+    {
+        name: 'wastelander-of-banditry-desert-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/wastelander-of-banditry-desert-relic_set/?lang=EN'
+    },
+    {
+        name: 'longevous-disciple-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/longevous-disciple-relic_set/?lang=EN'
+    },
+    {
+        name: 'messenger-traversing-hackerspace-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/messenger-traversing-hackerspace-relic_set/?lang=EN'
+    },
+    {
+        name: 'the-ashblazing-grand-duke-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/the-ashblazing-grand-duke-relic_set/?lang=EN'
+    },
+    {
+        name: 'prisoner-in-deep-confinement-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/prisoner-in-deep-confinement-relic_set/?lang=EN'
+    },
+    {
+        name: 'space-sealing-station-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/space-sealing-station-relic_set/?lang=EN'
+    },
+    {
+        name: 'fleet-of-the-ageless-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/fleet-of-the-ageless-relic_set/?lang=EN'
+    },
+    {
+        name: 'pan-cosmic-commercial-enterprise-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/pan-cosmic-commercial-enterprise-relic_set/?lang=EN'
+    },
+    {
+        name: 'belobog-of-the-architects-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/belobog-of-the-architects-relic_set/?lang=EN'
+    },
+    {
+        name: 'celestial-differentiator-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/celestial-differentiator-relic_set/?lang=EN'
+    },
+    {
+        name: 'inert-salsotto-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/inert-salsotto-relic_set/?lang=EN'
+    },
+    {
+        name: 'talia-kingdom-of-banditry-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/talia-kingdom-of-banditry-relic_set/?lang=EN'
+    },
+    {
+        name: 'sprightly-vonwacq-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/sprightly-vonwacq-relic_set/?lang=EN'
+    },
+    {
+        name: 'rutilant-arena-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/rutilant-arena-relic_set/?lang=EN'
+    },
+    {
+        name: 'broken-keel-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/broken-keel-relic_set/?lang=EN'
+    },
+    {
+        name: 'firmament-frontline-glamoth-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/firmament-frontline-glamoth-relic_set/?lang=EN'
+    },
+    {
+        name: 'penacony-land-of-the-dreams-relic_set',
+        url: 'https://hsr.honeyhunterworld.com/penacony-land-of-the-dreams-relic_set/?lang=EN'
+    }
+]
+
 
 
 
