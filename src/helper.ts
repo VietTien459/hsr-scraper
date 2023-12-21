@@ -10,6 +10,6 @@ export function generateRandomFileName(extension: string): string {
 
 export function createDir(directoryPath: string): void {
     if (!existsSync(directoryPath)) {
-        mkdirSync(directoryPath);
+        mkdirSync(directoryPath,{recursive: true});
     }
 }

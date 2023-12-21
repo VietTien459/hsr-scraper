@@ -1,8 +1,7 @@
-import {createDir, generateRandomFileName} from "./helper";
+import {createDir, generateRandomFileName} from "../helper";
 import {writeFile} from "fs/promises";
-import {Ability, CharacterData, CharacterStats, Eidolon} from "./interfaces";
+import {Ability, CharacterData, CharacterStats, Eidolon} from "../interfaces";
 import CheerioModule from "cheerio";
-
 
 /**
  * Extracts character data from the provided HTML string and saves it to a JSON file.
@@ -24,10 +23,10 @@ export function extractCharacterData(htmlData: string | undefined, outputFileNam
     if (!htmlData) {
         throw new Error("Empty HTML string")
     }
-    createDir('.out')
+    createDir('.out/characters')
     const fileName = outputFileName || generateRandomFileName("json")
     writeFile(
-        `.out/${fileName}.json`,
+        `.out/characters/${fileName}.json`,
         JSON.stringify({
             ...extractCharacterMainData(htmlData),
             stats: extractCharacterStats(htmlData),

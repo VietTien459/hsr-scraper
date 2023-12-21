@@ -1,6 +1,7 @@
 import {fetchFromWebOrCache} from './fetch'
-import {CharacterUrls} from "./global";
-import {extractCharacterData} from "./character-extraction";
+import {CharacterUrls, LightConeUrls,} from "./global";
+import {extractCharacterData} from "./extraction/character-extraction";
+import {extractLightConeData} from "./extraction/lightcone-extraction";
 
 CharacterUrls
     .forEach(charUrl =>
@@ -9,3 +10,12 @@ CharacterUrls
                 htmlData => extractCharacterData(htmlData, charUrl.name)
             )
     )
+
+LightConeUrls
+    .forEach(charUrl =>
+        fetchFromWebOrCache(charUrl.url, true)
+            .then(
+                htmlData => extractLightConeData(htmlData, charUrl.name)
+            )
+    )
+

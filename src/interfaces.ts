@@ -33,6 +33,9 @@ export interface CharacterStats {
 }
 
 
+export type LightConeStats = Partial<CharacterStats>
+
+
 export interface Ascension {
     level: number;
     percentage: string;
@@ -55,3 +58,12 @@ export interface Eidolon {
     description: string
 }
 
+
+export interface LightConeData {
+    name: string;
+    rarity: number;
+    path: string;
+    skill: string;
+    ascensionMaterials: AscensionMaterial[];
+    story: string;
+}
