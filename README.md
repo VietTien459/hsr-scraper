@@ -36,6 +36,7 @@ The project includes several npm scripts to facilitate common tasks:
 - compile: Compiles TypeScript code using tsc.
 - lint: Lints the project files using ESLint.
 - start: Runs the TypeScript code using ts-node.
+- get: Write URL list of data in JSON file.
 - character: Extracts character data using the extractCharacters function.
 - lightcone: Extracts LightCone data using the extractLightCone function.
 - relic: Extracts relic data using the extractRelic function.
