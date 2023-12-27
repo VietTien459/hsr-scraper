@@ -7,9 +7,10 @@
     "compile": "npx tsc",
     "lint": "eslint . --fix",
     "start": "npx ts-node src/main.ts",
+    "get": "npx run-func ./dist/global.js getUrlData",
     "character": "npx run-func ./dist/main.js extractCharacters",
-    "lightcone": "npx run-func ./dist/main.js extractLightCone",
-    "relic": "npx run-func ./dist/main.js extractRelic"
+    "lightcone": "npx run-func ./dist/main.js extractLightCones",
+    "relic": "npx run-func ./dist/main.js extractRelics"
   },
   "author": "Kita-chan",
   "license": "ISC",
@@ -28,6 +29,7 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "jsdom": "^22.1.0"
+    "jsdom": "^22.1.0",
+    "puppeteer": "^21.6.1"
   }
 }
